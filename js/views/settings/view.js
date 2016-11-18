@@ -57,7 +57,7 @@ class Settings extends React.Component {
         />
         <Switcher
           changeHandler={props.change}
-          title="Allow notifications"
+          title="Notifications"
           name="notifyAllow"
           checked={sData.notifyAllow.value}
         />

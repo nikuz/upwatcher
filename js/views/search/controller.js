@@ -21,48 +21,50 @@ const mapStateToProps = function(state) {
 const mapDispatchToProps = function(dispatch) {
   return {
     addFeedsRequest: async function(value) {
-      var curFeedsValue = await searchModel.get(),
-        isVerifierWaiterActive = await upworkModel.getVerifierWaiter();
+      var curFeedsValue = await searchModel.get();
+      if (!value && !curFeedsValue) {
+        return;
+      }
+
+      let isVerifierWaiterActive = await upworkModel.getVerifierWaiter();
 
       // for initial search, when user will get an upwork token
       // search request should be repeated
-      if (curFeedsValue !== value || isVerifierWaiterActive) {
-        if (!isVerifierWaiterActive && value) {
-          await searchModel.set(value);
-        }
-        if (!value) {
-          value = curFeedsValue;
-        }
-        dispatch(searchActions.addFeeds(value));
+      if (!isVerifierWaiterActive && value) {
+        await searchModel.set(value);
+      }
+      if (!value) {
+        value = curFeedsValue;
+      }
+      dispatch(searchActions.addFeeds(value));
 
-        let response,
-          responseErr;
+      let response,
+        responseErr;
 
-        try {
-          response = await upworkController.getFeeds(value);
-        } catch (err) {
-          responseErr = err;
-        }
+      try {
+        response = await upworkController.getFeeds(value);
+      } catch (err) {
+        responseErr = err;
+      }
 
-        dispatch(searchActions.feedsUpdateFinished());
+      dispatch(searchActions.feedsUpdateFinished());
 
-        if (response === null) {
-          return; // when user doesn't have an upwork token and upwork website was opened, controller will return null
-        } else if (response && response.jobs) {
-          dispatch(errorActions.hide());
-          feedsModel.set(response.jobs);
-          if (response.jobs.length) {
-            dispatch(feedsActions.update(response.jobs));
-          } else {
-            dispatch(feedsActions.markAsEmpty());
-          }
+      if (response === null) {
+        return; // when user doesn't have an upwork token and upwork website was opened, controller will return null
+      } else if (response && response.jobs) {
+        dispatch(errorActions.hide());
+        feedsModel.set(response.jobs);
+        if (response.jobs.length) {
+          dispatch(feedsActions.update(response.jobs));
         } else {
-          dispatch(errorActions.show(this.addFeedsRequest.bind(this)));
-          if (responseErr) {
-            logsController.captureError(responseErr);
-          } else {
-            logsController.captureMessage('Search controller `addFeedsRequest` empty response');
-          }
+          dispatch(feedsActions.markAsEmpty());
+        }
+      } else {
+        dispatch(errorActions.show(this.addFeedsRequest.bind(this, value)));
+        if (responseErr) {
+          logsController.captureError(responseErr);
+        } else {
+          logsController.captureMessage('Search controller `addFeedsRequest` empty response');
         }
       }
     },
