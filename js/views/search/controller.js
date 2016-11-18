@@ -21,7 +21,7 @@ const mapStateToProps = function(state) {
 const mapDispatchToProps = function(dispatch) {
   return {
     addFeedsRequest: async function(value) {
-      var curFeedsValue = await searchModel.get();
+      let curFeedsValue = await searchModel.get();
       if (!value && !curFeedsValue) {
         return;
       }
@@ -39,12 +39,17 @@ const mapDispatchToProps = function(dispatch) {
       dispatch(searchActions.addFeeds(value));
 
       let response,
-        responseErr;
+        responseErr,
+        networkError;
 
       try {
         response = await upworkController.getFeeds(value);
       } catch (err) {
-        responseErr = err;
+        if (err === 'network') {
+          networkError = err;
+        } else {
+          responseErr = err;
+        }
       }
 
       dispatch(searchActions.feedsUpdateFinished());
@@ -60,9 +65,11 @@ const mapDispatchToProps = function(dispatch) {
           dispatch(feedsActions.markAsEmpty());
         }
       } else {
-        dispatch(errorActions.show(this.addFeedsRequest.bind(this, value)));
         if (responseErr) {
+          dispatch(errorActions.show(this.addFeedsRequest.bind(this, value)));
           logsController.captureError(responseErr);
+        } else if (networkError) {
+          dispatch(errorActions.showNetwork());
         } else {
           logsController.captureMessage('Search controller `addFeedsRequest` empty response');
         }
