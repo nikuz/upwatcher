@@ -34,7 +34,7 @@ async function set(data) {
     data[key] = _.pick(item, allowedFields);
   });
   if (data.length) {
-    userController.lastJobDateSave(data[0].date_created)
+    userController.lastJobDateSave(data[0].date_created);
   }
   return await storage.set(storageCollectionName, data);
 }
