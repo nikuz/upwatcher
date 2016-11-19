@@ -33,10 +33,10 @@ const DEFAULT = {
       60: '1 hour',
       180: '3 hours'
     },
-    value: 5
+    value: 30
   },
   notifyAllow: {
-    value: false
+    value: true
   },
   dndFrom: {
     value: '00:00'
