@@ -4,7 +4,8 @@ import React from 'react';
 import {
   View,
   Text,
-  TouchableHighlight
+  TouchableHighlight,
+  BackAndroid
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import styles from './style';
@@ -13,11 +14,25 @@ class Tabs extends React.Component {
   constructor(props) {
     super(props);
     this.handlerClick = this.handlerClick.bind(this);
+    this.backToSearch = this.backToSearch.bind(this);
   }
   handlerClick(tabId) {
     if (tabId !== this.props.tabs.activeTab) {
       this.props.change(tabId);
     }
+  }
+  backToSearch() {
+    if (this.props.tabs.activeTab === 'favorites') {
+      this.props.change('search');
+      return true;
+    }
+    return false;
+  }
+  componentDidMount() {
+    BackAndroid.addEventListener('hardwareBackPress', this.backToSearch);
+  }
+  componentWillUnmount() {
+    BackAndroid.removeEventListener('hardwareBackPress', this.backToSearch);
   }
   render() {
     var tabs = this.props.tabs;

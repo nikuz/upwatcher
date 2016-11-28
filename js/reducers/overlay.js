@@ -23,7 +23,7 @@ export default function overlayReducers(state = DEFAULT, action) {
 
     case 'OVERLAY_CLOSE':
       return Object.assign({}, state, {
-        visible: false,
+        visible: false
       });
 
     default:

@@ -26,11 +26,7 @@ const mapDispatchToProps = function(dispatch) {
         return;
       }
 
-      let isVerifierWaiterActive = await upworkModel.getVerifierWaiter();
-
-      // for initial search, when user will get an upwork token
-      // search request should be repeated
-      if (!isVerifierWaiterActive && value) {
+      if (value && value !== curFeedsValue) {
         await searchModel.set(value);
       }
       if (!value) {

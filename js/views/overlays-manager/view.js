@@ -6,9 +6,9 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
+  BackAndroid
 } from 'react-native';
-import * as _ from 'underscore';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import styles from './style';
 
@@ -26,7 +26,7 @@ class Overlay extends React.Component {
     };
     this.onShow = this.onShow.bind(this);
     this.close = this.close.bind(this);
-    this.openHandler = this.openHandler.bind(this);
+    this.hardwareBackPress = this.hardwareBackPress.bind(this);
   }
   onShow() {
     this.setState({
@@ -34,14 +34,14 @@ class Overlay extends React.Component {
     });
   }
   close() {
-    this.setState({
-      visible: false,
-      component: null
-    });
+    this.props.close();
   }
-  openHandler(options) {
-    var opts = options || {};
-    this.setState(_.extend(this.state, opts, {visible: true}));
+  hardwareBackPress() {
+    if (this.state.visible) {
+      this.close();
+      return true;
+    }
+    return false;
   }
   componentWillReceiveProps(nextProps) {
     var props = nextProps.overlay;
@@ -53,6 +53,12 @@ class Overlay extends React.Component {
       animationType: props.animationType,
       component: (!props.visible || !this.state.visible) ? null : props.component
     });
+  }
+  componentDidMount() {
+    BackAndroid.addEventListener('hardwareBackPress', this.hardwareBackPress);
+  }
+  componentWillUnmount() {
+    BackAndroid.removeEventListener('hardwareBackPress', this.hardwareBackPress);
   }
   render() {
     var state = this.state,
@@ -94,7 +100,8 @@ class Overlay extends React.Component {
 }
 
 Overlay.propTypes = {
-  overlay: React.PropTypes.object.isRequired
+  overlay: React.PropTypes.object.isRequired,
+  close: React.PropTypes.func.isRequired
 };
 
 export default Overlay;
